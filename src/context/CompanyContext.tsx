@@ -32,30 +32,88 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const { data, error } = await supabase
-          .from('company_metrics')
-          .select('id, client_name')
-          .order('client_name');
-
-        if (error) {
-          throw error;
+        console.log("Fetching companies from Supabase...");
+        
+        // First try to get distinct client names from invoices
+        let { data: invoiceData, error: invoiceError } = await supabase
+          .from('invoices')
+          .select('Client Name')
+          .order('Client Name');
+          
+        if (invoiceError) {
+          console.error('Error fetching from invoices:', invoiceError);
+          throw invoiceError;
         }
-
-        const uniqueCompanies = Array.from(
-          new Map(data.map(item => [item.client_name, {
-            id: item.id,
-            name: item.client_name
-          }])).values()
-        );
-
+        
+        console.log("Invoice data response:", invoiceData);
+        
+        let uniqueCompanies: Company[] = [];
+        
+        if (invoiceData && invoiceData.length > 0) {
+          // Use client names from invoices
+          uniqueCompanies = Array.from(
+            new Map(invoiceData.map(item => [item['Client Name'], {
+              id: item['Client Name'], // Using client name as ID since we don't have a separate ID
+              name: item['Client Name']
+            }])).values()
+          );
+        } else {
+          // If no data in invoices, try company_metrics
+          const { data: metricsData, error: metricsError } = await supabase
+            .from('company_metrics')
+            .select('id, client_name')
+            .order('client_name');
+          
+          if (metricsError) {
+            console.error('Error fetching from company_metrics:', metricsError);
+            throw metricsError;
+          }
+          
+          console.log("Metrics data response:", metricsData);
+          
+          if (metricsData && metricsData.length > 0) {
+            uniqueCompanies = metricsData.map(item => ({
+              id: item.id,
+              name: item.client_name || 'Unknown'
+            }));
+          }
+        }
+        
+        console.log("Processed unique companies:", uniqueCompanies);
+        
+        // If no real data, add fallback companies for development
+        if (uniqueCompanies.length === 0) {
+          uniqueCompanies = [
+            { id: 'company-1', name: 'Acme Corp' },
+            { id: 'company-2', name: 'Globex Industries' },
+            { id: 'company-3', name: 'Stark Enterprises' }
+          ];
+          console.log("No companies found in database, using fallback data");
+          toast.info('Using demo companies - no data found in database');
+        } else {
+          toast.success(`${uniqueCompanies.length} companies loaded successfully`);
+        }
+        
         setCompanies(uniqueCompanies);
-        if (uniqueCompanies.length > 0) {
+        
+        // Select the first company by default
+        if (uniqueCompanies.length > 0 && !selectedCompany) {
           setSelectedCompany(uniqueCompanies[0]);
         }
-        toast.success('Companies loaded successfully');
       } catch (error) {
         console.error('Error fetching companies:', error);
         toast.error('Failed to load companies');
+        
+        // Set fallback companies in case of error
+        const fallbackCompanies = [
+          { id: 'company-1', name: 'Acme Corp' },
+          { id: 'company-2', name: 'Globex Industries' },
+          { id: 'company-3', name: 'Stark Enterprises' }
+        ];
+        setCompanies(fallbackCompanies);
+        if (!selectedCompany && fallbackCompanies.length > 0) {
+          setSelectedCompany(fallbackCompanies[0]);
+        }
       } finally {
         setLoading(false);
       }
