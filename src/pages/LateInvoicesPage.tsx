@@ -1,7 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCompany } from "@/context/CompanyContext";
-import { FilterPanel, FilterValues } from "@/components/filters/FilterPanel";
 import { InvoicesTable, Invoice } from "@/components/tables/InvoicesTable";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,7 +9,7 @@ export default function LateInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [lateInvoices, setLateInvoices] = useState<Invoice[]>([]);
   
-  useState(() => {
+  useEffect(() => {
     const fetchLateInvoices = async () => {
       if (!selectedCompany) return;
       

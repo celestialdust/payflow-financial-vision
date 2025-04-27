@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useCompany } from "@/context/CompanyContext";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -39,7 +40,7 @@ export default function DashboardPage() {
         console.log(`Fetching metrics for company: ${selectedCompany.name}`);
         
         // First try company_metrics table
-        let { data, error } = await supabase
+        const { data, error } = await supabase
           .from('company_metrics')
           .select('*')
           .eq('client_name', selectedCompany.name)
@@ -80,7 +81,7 @@ export default function DashboardPage() {
               ? paidInvoices.reduce((sum, inv) => sum + (inv['No. Days taken to Pay'] || 0), 0) / paidInvoices.length 
               : 0;
             
-            data = {
+            const calculatedMetrics: CompanyMetrics = {
               id: selectedCompany.id,
               client_name: selectedCompany.name,
               total_invoiced,
@@ -95,11 +96,12 @@ export default function DashboardPage() {
               monthly_data: {}
             };
             
-            console.log("Calculated metrics from invoices:", data);
+            setMetrics(calculatedMetrics);
+            console.log("Calculated metrics from invoices:", calculatedMetrics);
           } else {
             // Use mock data if no real data available
             console.log("No invoice data found, using mock data");
-            data = {
+            const mockMetrics: CompanyMetrics = {
               id: selectedCompany.id,
               client_name: selectedCompany.name,
               total_invoiced: 150000,
@@ -113,11 +115,13 @@ export default function DashboardPage() {
               payment_status_breakdown: {},
               monthly_data: {}
             };
+            
+            setMetrics(mockMetrics);
           }
+        } else {
+          setMetrics(data as CompanyMetrics);
+          toast.success('Dashboard data loaded successfully');
         }
-
-        setMetrics(data);
-        toast.success('Dashboard data loaded successfully');
       } catch (error) {
         console.error('Error fetching metrics:', error);
         toast.error('Failed to load metrics data');
