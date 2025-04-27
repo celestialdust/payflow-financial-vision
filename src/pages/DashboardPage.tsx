@@ -60,7 +60,7 @@ export default function DashboardPage() {
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
             .select('*')
-            .eq('Client Name', selectedCompany.name);
+            .eq('"Client Name"', selectedCompany.name);
             
           if (invoiceError) {
             console.error('Error fetching from invoices:', invoiceError);

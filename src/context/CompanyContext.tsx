@@ -34,47 +34,48 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         console.log("Fetching companies from Supabase...");
         
-        // First try to get distinct client names from invoices
-        let { data: invoiceData, error: invoiceError } = await supabase
-          .from('invoices')
-          .select('Client Name')
-          .order('Client Name');
+        // First try the company_metrics table for unique client names
+        let { data: metricsData, error: metricsError } = await supabase
+          .from('company_metrics')
+          .select('id, client_name')
+          .order('client_name');
           
-        if (invoiceError) {
-          console.error('Error fetching from invoices:', invoiceError);
-          throw invoiceError;
+        if (metricsError) {
+          console.error('Error fetching from company_metrics:', metricsError);
         }
         
-        console.log("Invoice data response:", invoiceData);
+        console.log("Metrics data response for companies:", metricsData);
         
         let uniqueCompanies: Company[] = [];
         
-        if (invoiceData && invoiceData.length > 0) {
-          // Use client names from invoices
-          uniqueCompanies = Array.from(
-            new Map(invoiceData.map(item => [item['Client Name'], {
-              id: item['Client Name'], // Using client name as ID since we don't have a separate ID
-              name: item['Client Name']
-            }])).values()
-          );
+        if (metricsData && metricsData.length > 0) {
+          // Use client names from metrics
+          uniqueCompanies = metricsData.map(item => ({
+            id: item.id || item.client_name || 'unknown-id',
+            name: item.client_name || 'Unknown'
+          }));
         } else {
-          // If no data in invoices, try company_metrics
-          const { data: metricsData, error: metricsError } = await supabase
-            .from('company_metrics')
-            .select('id, client_name')
-            .order('client_name');
+          // If no data in company_metrics, try invoices
+          const { data: invoiceData, error: invoiceError } = await supabase
+            .from('invoices')
+            .select('"Client Name"')
+            .order('"Client Name"');
           
-          if (metricsError) {
-            console.error('Error fetching from company_metrics:', metricsError);
-            throw metricsError;
+          if (invoiceError) {
+            console.error('Error fetching from invoices:', invoiceError);
+            throw invoiceError;
           }
           
-          console.log("Metrics data response:", metricsData);
+          console.log("Invoice data response for companies:", invoiceData);
           
-          if (metricsData && metricsData.length > 0) {
-            uniqueCompanies = metricsData.map(item => ({
-              id: item.id,
-              name: item.client_name || 'Unknown'
+          if (invoiceData && invoiceData.length > 0) {
+            // Create a unique set of client names
+            const uniqueClientNames = new Set(invoiceData.map(item => item['Client Name']));
+            
+            // Convert to array format with proper id and name
+            uniqueCompanies = Array.from(uniqueClientNames).map(name => ({
+              id: name || 'unknown-id',
+              name: name || 'Unknown'
             }));
           }
         }
@@ -99,6 +100,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // Select the first company by default
         if (uniqueCompanies.length > 0 && !selectedCompany) {
           setSelectedCompany(uniqueCompanies[0]);
+          console.log(`Selected default company: ${uniqueCompanies[0].name}`);
         }
       } catch (error) {
         console.error('Error fetching companies:', error);

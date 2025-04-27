@@ -54,8 +54,8 @@ export function PaymentStatusChart() {
           
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
-            .select('Payment Status')
-            .eq('Client Name', selectedCompany.name);
+            .select('"Payment Status"')
+            .eq('"Client Name"', selectedCompany.name);
             
           if (invoiceError) {
             console.error('Error fetching invoices for payment status:', invoiceError);

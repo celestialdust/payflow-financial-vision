@@ -25,7 +25,7 @@ export default function InvoicesPage() {
         const { data, error } = await supabase
           .from('invoices')
           .select('*')
-          .eq('Client Name', selectedCompany.name);
+          .eq('"Client Name"', selectedCompany.name);
 
         if (error) {
           console.error('Error fetching invoices:', error);
