@@ -184,19 +184,21 @@ export function RevenueChart() {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
-          margin={{ top: 10, right: 30, left: 60, bottom: 0 }}
+          margin={{
+            top: 10,
+            right: 30,
+            left: 0,
+            bottom: 0,
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
-          <YAxis 
-            tickFormatter={(value) => `${formatCurrency(value)}`}
-            width={100}
-          />
+          <YAxis tickFormatter={(value) => `$${value}`} />
           <Tooltip 
-            formatter={(value, name) => [
-              formatCurrency(Number(value)), 
-              name === 'invoiced' ? 'Invoiced Amount' : 'Paid Amount'
-            ]} 
+            formatter={(value, name) => {
+              const label = name === "invoiced" ? "Invoiced Amount" : "Paid Amount";
+              return [formatCurrency(Number(value)), label];
+            }} 
           />
           <Area 
             type="monotone" 
@@ -204,7 +206,7 @@ export function RevenueChart() {
             stroke="#007bff" 
             fill="#007bff" 
             fillOpacity={0.3} 
-            name="Invoiced Amount"
+            name="Invoiced"
           />
           <Area 
             type="monotone" 
@@ -212,7 +214,7 @@ export function RevenueChart() {
             stroke="#28a745" 
             fill="#28a745" 
             fillOpacity={0.3} 
-            name="Paid Amount"
+            name="Paid"
           />
         </AreaChart>
       </ResponsiveContainer>
