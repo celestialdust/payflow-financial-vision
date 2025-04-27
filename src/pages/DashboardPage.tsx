@@ -9,12 +9,21 @@ import { formatCurrency } from "@/lib/utils";
 import { BarChart, Calendar, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 
 interface CompanyMetrics {
+  id?: string;
+  client_name?: string;
   total_invoiced: number;
   total_paid: number;
   outstanding_amount: number;
   average_days_to_pay: number;
+  late_invoices_count?: number;
+  late_invoices_percentage?: number;
+  outstanding_invoices?: number;
+  total_invoices?: number;
+  payment_status_breakdown?: Json;
+  monthly_data?: Json;
 }
 
 export default function DashboardPage() {
@@ -73,10 +82,18 @@ export default function DashboardPage() {
               : 0;
             
             data = {
+              id: selectedCompany.id,
+              client_name: selectedCompany.name,
               total_invoiced,
               total_paid,
               outstanding_amount,
-              average_days_to_pay
+              average_days_to_pay,
+              late_invoices_count: 0,
+              late_invoices_percentage: 0,
+              outstanding_invoices: 0,
+              total_invoices: invoiceData.length,
+              payment_status_breakdown: {},
+              monthly_data: {}
             };
             
             console.log("Calculated metrics from invoices:", data);
@@ -84,10 +101,18 @@ export default function DashboardPage() {
             // Use mock data if no real data available
             console.log("No invoice data found, using mock data");
             data = {
+              id: selectedCompany.id,
+              client_name: selectedCompany.name,
               total_invoiced: 150000,
               total_paid: 120000,
               outstanding_amount: 30000,
-              average_days_to_pay: 15
+              average_days_to_pay: 15,
+              late_invoices_count: 0,
+              late_invoices_percentage: 0,
+              outstanding_invoices: 0,
+              total_invoices: 0,
+              payment_status_breakdown: {},
+              monthly_data: {}
             };
           }
         }
@@ -100,10 +125,18 @@ export default function DashboardPage() {
         
         // Use mock data in case of error
         setMetrics({
+          id: selectedCompany?.id,
+          client_name: selectedCompany?.name,
           total_invoiced: 150000,
           total_paid: 120000,
           outstanding_amount: 30000,
-          average_days_to_pay: 15
+          average_days_to_pay: 15,
+          late_invoices_count: 0,
+          late_invoices_percentage: 0,
+          outstanding_invoices: 0,
+          total_invoices: 0,
+          payment_status_breakdown: {},
+          monthly_data: {}
         });
       } finally {
         setLoading(false);

@@ -12,11 +12,18 @@ import {
 import { useCompany } from "@/context/CompanyContext";
 import { formatCurrency } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 interface RevenueData {
   month: string;
   invoiced: number;
   paid: number;
+}
+
+// Define interface for the monthly data structure
+interface MonthlyData {
+  monthly_invoiced?: Record<string, number>;
+  monthly_paid?: Record<string, number>;
 }
 
 export function RevenueChart() {
@@ -49,8 +56,8 @@ export function RevenueChart() {
         let chartData: RevenueData[] = [];
         
         if (metricsData?.monthly_data) {
-          // Use monthly_data from company_metrics
-          const monthlyData = metricsData.monthly_data;
+          // Cast monthly_data to MonthlyData type
+          const monthlyData = metricsData.monthly_data as MonthlyData;
           
           if (monthlyData.monthly_invoiced && monthlyData.monthly_paid) {
             // Convert to array format for chart
@@ -83,7 +90,7 @@ export function RevenueChart() {
           
           if (monthlyData && monthlyData.length > 0) {
             chartData = monthlyData.map(item => ({
-              month: item.month,
+              month: item.month || '',
               invoiced: item.invoiced_amount || 0,
               paid: item.paid_amount || 0
             }));
