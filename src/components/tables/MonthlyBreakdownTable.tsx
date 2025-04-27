@@ -10,12 +10,20 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export interface MonthlyData {
   id: string;
   month: string;
   invoicedAmount: number;
   paidAmount: number;
+  outstandingAmount?: number;
   growthRate: number;
 }
 
@@ -27,6 +35,8 @@ interface MonthlyBreakdownTableProps {
 export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdownTableProps) {
   const [sortField, setSortField] = useState<keyof MonthlyData>("month");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const handleSort = (field: keyof MonthlyData) => {
     if (sortField === field) {
@@ -39,7 +49,6 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
 
   const sortedData = [...data].sort((a, b) => {
     if (sortField === "month") {
-      // Extract year and month parts for proper date sorting
       const getDateValue = (monthStr: string) => {
         const [year, month] = monthStr.split('-').map(Number);
         return year * 100 + month;
@@ -53,7 +62,6 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
         : valueB - valueA;
     }
     
-    // For numeric fields, ensure we're using number values for comparison
     const valueA = a[sortField] as number;
     const valueB = b[sortField] as number;
     
@@ -61,6 +69,12 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
       ? valueA - valueB
       : valueB - valueA;
   });
+
+  const pageCount = Math.ceil(sortedData.length / itemsPerPage);
+  const paginatedData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const renderSortIndicator = (field: keyof MonthlyData) => {
     if (sortField !== field) return null;
@@ -75,57 +89,84 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
         </TableRow>
       ));
     }
 
-    if (sortedData.length === 0) {
+    if (paginatedData.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
-            No monthly data available for the selected company.
+          <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+            No monthly data available.
           </TableCell>
         </TableRow>
       );
     }
 
-    return sortedData.map((item) => (
-      <TableRow key={item.id}>
-        <TableCell className="font-medium">{item.month}</TableCell>
-        <TableCell>{formatCurrency(item.invoicedAmount)}</TableCell>
-        <TableCell>{formatCurrency(item.paidAmount)}</TableCell>
-        <TableCell>
-          <span className={item.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}>
-            {item.growthRate >= 0 ? '+' : ''}{item.growthRate}%
-          </span>
-        </TableCell>
-      </TableRow>
-    ));
+    return paginatedData.map((item) => {
+      const outstandingAmount = item.invoicedAmount - item.paidAmount;
+      return (
+        <TableRow key={item.id}>
+          <TableCell className="font-medium">{item.month}</TableCell>
+          <TableCell>{formatCurrency(item.invoicedAmount)}</TableCell>
+          <TableCell>{formatCurrency(item.paidAmount)}</TableCell>
+          <TableCell>{formatCurrency(outstandingAmount)}</TableCell>
+          <TableCell>
+            <span className={item.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}>
+              {item.growthRate >= 0 ? '+' : ''}{item.growthRate}%
+            </span>
+          </TableCell>
+        </TableRow>
+      );
+    });
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("month")}>
-              Month{renderSortIndicator("month")}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("invoicedAmount")}>
-              Invoiced Amount{renderSortIndicator("invoicedAmount")}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("paidAmount")}>
-              Paid Amount{renderSortIndicator("paidAmount")}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("growthRate")}>
-              Growth Rate (%){renderSortIndicator("growthRate")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {renderTableContent()}
-        </TableBody>
-      </Table>
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("month")}>
+                Month{renderSortIndicator("month")}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("invoicedAmount")}>
+                Invoiced Amount{renderSortIndicator("invoicedAmount")}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("paidAmount")}>
+                Paid Amount{renderSortIndicator("paidAmount")}
+              </TableHead>
+              <TableHead>Outstanding Amount</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("growthRate")}>
+                Growth Rate{renderSortIndicator("growthRate")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {renderTableContent()}
+          </TableBody>
+        </Table>
+      </div>
+      {pageCount > 1 && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            <PaginationItem>Page {currentPage} of {pageCount}</PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage(p => Math.min(pageCount, p + 1))}
+                disabled={currentPage === pageCount}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

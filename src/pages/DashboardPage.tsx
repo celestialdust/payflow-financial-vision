@@ -162,6 +162,8 @@ export default function DashboardPage() {
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 8.2, isPositive: true }}
+          className="overflow-hidden"
+          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Total Paid" 
@@ -169,6 +171,8 @@ export default function DashboardPage() {
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 12.5, isPositive: true }}
+          className="overflow-hidden"
+          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Outstanding Amount" 
@@ -176,6 +180,8 @@ export default function DashboardPage() {
           loading={loading}
           icon={<ArrowDown className="h-4 w-4" />}
           trend={{ value: 3.8, isPositive: false }}
+          className="overflow-hidden"
+          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Average Days to Pay" 
@@ -183,14 +189,16 @@ export default function DashboardPage() {
           loading={loading}
           icon={<Calendar className="h-4 w-4" />}
           trend={{ value: 1.3, isPositive: true }}
+          className="overflow-hidden"
+          valueClassName="text-xl sm:text-2xl truncate"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ChartCard title="Payment Status Distribution">
+        <ChartCard title="Payment Status Distribution" className="h-[400px]">
           <PaymentStatusChart />
         </ChartCard>
-        <ChartCard title="Revenue Over Time">
+        <ChartCard title="Revenue Over Time" className="h-[400px]">
           <RevenueChart />
         </ChartCard>
       </div>

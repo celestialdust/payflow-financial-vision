@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
@@ -37,46 +36,52 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // First try the company_metrics table for unique client names
         let { data: metricsData, error: metricsError } = await supabase
           .from('company_metrics')
-          .select('id, client_name')
-          .order('client_name');
+          .select('id, client_name');
           
         if (metricsError) {
           console.error('Error fetching from company_metrics:', metricsError);
         }
         
-        console.log("Metrics data response for companies:", metricsData);
-        
         let uniqueCompanies: Company[] = [];
         
         if (metricsData && metricsData.length > 0) {
-          // Use client names from metrics
-          uniqueCompanies = metricsData.map(item => ({
-            id: item.id || item.client_name || 'unknown-id',
-            name: item.client_name || 'Unknown'
-          }));
+          // Sort companies numerically if they are numbers
+          uniqueCompanies = metricsData
+            .map(item => ({
+              id: item.id || item.client_name || 'unknown-id',
+              name: item.client_name || 'Unknown'
+            }))
+            .sort((a, b) => {
+              const numA = parseInt(a.name);
+              const numB = parseInt(b.name);
+              if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+              }
+              return a.name.localeCompare(b.name);
+            });
         } else {
-          // If no data in company_metrics, try invoices
+          // Fallback to invoices if no metrics data
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
-            .select('"Client Name"')
-            .order('"Client Name"');
+            .select('"Client Name"');
           
-          if (invoiceError) {
-            console.error('Error fetching from invoices:', invoiceError);
-            throw invoiceError;
-          }
-          
-          console.log("Invoice data response for companies:", invoiceData);
+          if (invoiceError) throw invoiceError;
           
           if (invoiceData && invoiceData.length > 0) {
-            // Create a unique set of client names
-            const uniqueClientNames = new Set(invoiceData.map(item => item['Client Name']));
-            
-            // Convert to array format with proper id and name
-            uniqueCompanies = Array.from(uniqueClientNames).map(name => ({
-              id: name || 'unknown-id',
-              name: name || 'Unknown'
-            }));
+            const uniqueNames = new Set(invoiceData.map(item => item['Client Name']));
+            uniqueCompanies = Array.from(uniqueNames)
+              .map(name => ({
+                id: name || 'unknown-id',
+                name: name || 'Unknown'
+              }))
+              .sort((a, b) => {
+                const numA = parseInt(a.name);
+                const numB = parseInt(b.name);
+                if (!isNaN(numA) && !isNaN(numB)) {
+                  return numA - numB;
+                }
+                return a.name.localeCompare(b.name);
+              });
           }
         }
         
