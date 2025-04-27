@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useCompany } from "@/context/CompanyContext";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { PaymentStatusChart } from "@/components/charts/PaymentStatusChart";
 import { RevenueChart } from "@/components/charts/RevenueChart";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatLargeNumber } from "@/lib/utils";
 import { BarChart, Calendar, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -158,47 +157,39 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard 
           title="Total Invoiced" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.total_invoiced || 0)} 
+          value={loading ? "Loading..." : `$${formatLargeNumber(metrics?.total_invoiced || 0)}`}
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 8.2, isPositive: true }}
-          className="overflow-hidden"
-          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Total Paid" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.total_paid || 0)} 
+          value={loading ? "Loading..." : `$${formatLargeNumber(metrics?.total_paid || 0)}`}
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 12.5, isPositive: true }}
-          className="overflow-hidden"
-          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Outstanding Amount" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.outstanding_amount || 0)} 
+          value={loading ? "Loading..." : `$${formatLargeNumber(metrics?.outstanding_amount || 0)}`}
           loading={loading}
           icon={<ArrowDown className="h-4 w-4" />}
           trend={{ value: 3.8, isPositive: false }}
-          className="overflow-hidden"
-          valueClassName="text-xl sm:text-2xl truncate"
         />
         <KpiCard 
           title="Average Days to Pay" 
-          value={loading ? "Loading..." : `${Math.round(metrics?.average_days_to_pay || 0)} days`} 
+          value={loading ? "Loading..." : `${Math.round(metrics?.average_days_to_pay || 0)} days`}
           loading={loading}
           icon={<Calendar className="h-4 w-4" />}
           trend={{ value: 1.3, isPositive: true }}
-          className="overflow-hidden"
-          valueClassName="text-xl sm:text-2xl truncate"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ChartCard title="Payment Status Distribution" className="h-[400px]">
+        <ChartCard title="Payment Status Distribution">
           <PaymentStatusChart />
         </ChartCard>
-        <ChartCard title="Revenue Over Time" className="h-[400px]">
+        <ChartCard title="Revenue Over Time">
           <RevenueChart />
         </ChartCard>
       </div>

@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -20,6 +19,15 @@ export function formatPercentage(value: number): string {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1
   }).format(value / 100);
+}
+
+export function formatLargeNumber(number: number): string {
+  if (number >= 1000000) {
+    return `${(number / 1000000).toFixed(1)}M`;
+  } else if (number >= 1000) {
+    return `${(number / 1000).toFixed(1)}K`;
+  }
+  return number.toFixed(1);
 }
 
 export function getPaymentStatusColor(status: string): string {

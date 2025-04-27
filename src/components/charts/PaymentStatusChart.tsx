@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useCompany } from "@/context/CompanyContext";
@@ -23,8 +22,6 @@ export function PaymentStatusChart() {
     const fetchPaymentStatusData = async () => {
       setLoading(true);
       try {
-        console.log(`Fetching payment status data for company: ${selectedCompany.name}`);
-
         const { data: metricsData, error: metricsError } = await supabase
           .from('company_metrics')
           .select('payment_status_breakdown')
@@ -40,17 +37,13 @@ export function PaymentStatusChart() {
           
           // Consolidate and aggregate the data
           const consolidatedData: Record<string, number> = {};
+          
           Object.entries(breakdown).forEach(([status, count]) => {
-            // Standardize status names
-            let standardStatus = status;
-            if (status.toLowerCase().includes('paid')) {
-              if (status.toLowerCase().includes('fully')) standardStatus = 'Fully Paid';
-              else if (status.toLowerCase().includes('partial')) standardStatus = 'Partially Paid';
-              else if (status.toLowerCase().includes('over')) standardStatus = 'Overpaid';
-              else standardStatus = 'Paid';
-            } else {
-              standardStatus = 'Unpaid';
-            }
+            const standardStatus = 
+              status.toLowerCase().includes('fully paid') ? 'Fully Paid' :
+              status.toLowerCase().includes('partial') ? 'Partially Paid' :
+              status.toLowerCase().includes('unpaid') ? 'Unpaid' :
+              status.toLowerCase().includes('overdue') ? 'Overdue' : status;
             
             consolidatedData[standardStatus] = (consolidatedData[standardStatus] || 0) + count;
           });
@@ -66,11 +59,7 @@ export function PaymentStatusChart() {
         setData(chartData);
       } catch (error) {
         console.error('Error fetching payment status data:', error);
-        setData([
-          { name: 'Fully Paid', value: 65 },
-          { name: 'Partially Paid', value: 15 },
-          { name: 'Unpaid', value: 20 }
-        ]);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -101,7 +90,7 @@ export function PaymentStatusChart() {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value, name) => [`${value}%`, `${name} Invoices`]} />
+          <Tooltip formatter={(value, name) => [`${value} invoices`, name]} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

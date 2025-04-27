@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Table,
@@ -12,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, getPaymentStatusClass } from "@/lib/utils";
 import { Download } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface Invoice {
   id: string;
@@ -112,39 +112,37 @@ export function InvoicesTable({ invoices, loading = false, onExport }: InvoicesT
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Invoices</h3>
-        <Button size="sm" className="gap-1" onClick={onExport} disabled={loading || invoices.length === 0}>
-          <Download className="h-4 w-4" />
-          Export Filtered Results
-        </Button>
       </div>
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("reference")}>
-                Invoice Reference{renderSortIndicator("reference")}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("date")}>
-                Invoice Date{renderSortIndicator("date")}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("amount")}>
-                Invoice Amount{renderSortIndicator("amount")}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("paidAmount")}>
-                Paid Amount{renderSortIndicator("paidAmount")}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("daysToPay")}>
-                Days to Pay{renderSortIndicator("daysToPay")}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
-                Payment Status{renderSortIndicator("status")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {renderTableContent()}
-          </TableBody>
-        </Table>
+        <ScrollArea className="h-[600px]">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("reference")}>
+                  Invoice Reference{renderSortIndicator("reference")}
+                </TableHead>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("date")}>
+                  Invoice Date{renderSortIndicator("date")}
+                </TableHead>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("amount")}>
+                  Invoice Amount{renderSortIndicator("amount")}
+                </TableHead>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("paidAmount")}>
+                  Paid Amount{renderSortIndicator("paidAmount")}
+                </TableHead>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("daysToPay")}>
+                  Days to Pay{renderSortIndicator("daysToPay")}
+                </TableHead>
+                <TableHead className="cursor-pointer sticky top-0 bg-background" onClick={() => handleSort("status")}>
+                  Payment Status{renderSortIndicator("status")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {renderTableContent()}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Table,
@@ -124,7 +123,7 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -139,7 +138,7 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
               </TableHead>
               <TableHead>Outstanding Amount</TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort("growthRate")}>
-                Growth Rate{renderSortIndicator("growthRate")}
+                Invoiced Amount Growth{renderSortIndicator("growthRate")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -148,25 +147,6 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
           </TableBody>
         </Table>
       </div>
-      {pageCount > 1 && (
-        <Pagination className="mt-4">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              />
-            </PaginationItem>
-            <PaginationItem>Page {currentPage} of {pageCount}</PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage(p => Math.min(pageCount, p + 1))}
-                disabled={currentPage === pageCount}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
     </div>
   );
 }
