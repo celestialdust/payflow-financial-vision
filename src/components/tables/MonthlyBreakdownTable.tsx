@@ -45,14 +45,21 @@ export function MonthlyBreakdownTable({ data, loading = false }: MonthlyBreakdow
         return year * 100 + month;
       };
       
+      const valueA = getDateValue(a.month);
+      const valueB = getDateValue(b.month);
+      
       return sortDirection === "asc"
-        ? getDateValue(a.month) - getDateValue(b.month)
-        : getDateValue(b.month) - getDateValue(a.month);
+        ? valueA - valueB
+        : valueB - valueA;
     }
     
+    // For numeric fields, ensure we're using number values for comparison
+    const valueA = a[sortField] as number;
+    const valueB = b[sortField] as number;
+    
     return sortDirection === "asc"
-      ? a[sortField] - b[sortField]
-      : b[sortField] - a[sortField];
+      ? valueA - valueB
+      : valueB - valueA;
   });
 
   const renderSortIndicator = (field: keyof MonthlyData) => {
