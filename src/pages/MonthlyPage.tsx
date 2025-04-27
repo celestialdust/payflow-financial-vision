@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCompany } from "@/context/CompanyContext";
 import { MonthlyBreakdownTable, MonthlyData } from "@/components/tables/MonthlyBreakdownTable";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MonthlyPage() {
   const { selectedCompany } = useCompany();
@@ -11,22 +12,50 @@ export default function MonthlyPage() {
   useEffect(() => {
     if (!selectedCompany) return;
 
-    // Simulate API call delay
-    setLoading(true);
-    setTimeout(() => {
-      const mockData: MonthlyData[] = [
-        { id: '1', month: '2024-01', invoicedAmount: 15400, paidAmount: 12500, growthRate: 5.2 },
-        { id: '2', month: '2024-02', invoicedAmount: 16200, paidAmount: 15100, growthRate: 5.2 },
-        { id: '3', month: '2024-03', invoicedAmount: 18500, paidAmount: 17200, growthRate: 14.2 },
-        { id: '4', month: '2024-04', invoicedAmount: 17200, paidAmount: 16100, growthRate: -7.0 },
-        { id: '5', month: '2024-05', invoicedAmount: 19100, paidAmount: 17800, growthRate: 11.0 },
-        { id: '6', month: '2024-06', invoicedAmount: 18300, paidAmount: 16900, growthRate: -4.2 },
-        { id: '7', month: '2024-07', invoicedAmount: 20100, paidAmount: 18600, growthRate: 9.8 },
-      ];
-      setMonthlyData(mockData);
-      setLoading(false);
-    }, 1000);
+    const fetchMonthlyData = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('monthly_breakdown')
+          .select('*')
+          .eq('client_name', selectedCompany.name);
+
+        if (error) {
+          throw error;
+        }
+
+        const formattedData: MonthlyData[] = data.map(item => ({
+          id: item.id,
+          month: item.month,
+          invoicedAmount: item.invoiced_amount || 0,
+          paidAmount: item.paid_amount || 0,
+          growthRate: calculateGrowthRate(item.invoiced_amount, getPreviousMonthAmount(data, item.month))
+        }));
+
+        setMonthlyData(formattedData);
+      } catch (error) {
+        console.error('Error fetching monthly data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMonthlyData();
   }, [selectedCompany]);
+
+  // Helper function to calculate growth rate
+  const calculateGrowthRate = (current: number, previous: number): number => {
+    if (!previous) return 0;
+    return Number(((current - previous) / previous * 100).toFixed(1));
+  };
+
+  // Helper function to get previous month's amount
+  const getPreviousMonthAmount = (data: any[], currentMonth: string): number => {
+    const months = data.sort((a, b) => a.month.localeCompare(b.month));
+    const currentIndex = months.findIndex(m => m.month === currentMonth);
+    if (currentIndex <= 0) return 0;
+    return months[currentIndex - 1].invoiced_amount || 0;
+  };
 
   return (
     <div className="space-y-6">

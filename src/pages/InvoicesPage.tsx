@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useCompany } from "@/context/CompanyContext";
 import { FilterPanel, FilterValues } from "@/components/filters/FilterPanel";
 import { InvoicesTable, Invoice } from "@/components/tables/InvoicesTable";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function InvoicesPage() {
   const { selectedCompany } = useCompany();
@@ -16,50 +16,37 @@ export default function InvoicesPage() {
   useEffect(() => {
     if (!selectedCompany) return;
 
-    // Simulate API call delay
-    setLoading(true);
-    setTimeout(() => {
-      const mockInvoices: Invoice[] = Array.from({ length: 20 }).map((_, index) => {
-        const date = new Date();
-        date.setDate(date.getDate() - Math.floor(Math.random() * 60));
-        
-        const amount = Math.floor(Math.random() * 10000) + 1000;
-        const statuses = ["Fully Paid", "Partially Paid", "Unpaid", "Overpaid"];
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
-        
-        let paidAmount = 0;
-        let daysToPay = null;
-        
-        if (status === "Fully Paid") {
-          paidAmount = amount;
-          daysToPay = Math.floor(Math.random() * 45) + 1;
-        } else if (status === "Partially Paid") {
-          paidAmount = Math.floor(amount * 0.7);
-          daysToPay = Math.floor(Math.random() * 45) + 1;
-        } else if (status === "Overpaid") {
-          paidAmount = Math.floor(amount * 1.05);
-          daysToPay = Math.floor(Math.random() * 30) + 1;
-        }
-        
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        
-        return {
-          id: `inv-${index + 1}`,
-          reference: `${year}-${1000 + index}`,
-          date: `${year}-${month}-${day}`,
-          amount,
-          paidAmount,
-          daysToPay,
-          status
-        };
-      });
-      
-      setInvoices(mockInvoices);
-      setFilteredInvoices(mockInvoices);
-      setLoading(false);
-    }, 1000);
+    const fetchInvoices = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('Client Name', selectedCompany.name);
+
+        if (error) throw error;
+
+        const formattedInvoices: Invoice[] = data.map(item => ({
+          id: item.id,
+          reference: item['Invoice Reference'],
+          date: item['Date Invoiced'],
+          amount: item['Invoice Amount'],
+          paidAmount: item['Paid Amount'],
+          daysToPay: item['No. Days taken to Pay'],
+          status: item['Payment Status']
+        }));
+
+        setInvoices(formattedInvoices);
+        setFilteredInvoices(formattedInvoices);
+      } catch (error) {
+        console.error('Error fetching invoices:', error);
+        toast.error('Failed to load invoices');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
   }, [selectedCompany]);
 
   const handleFilter = (filters: FilterValues) => {

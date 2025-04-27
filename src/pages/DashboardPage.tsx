@@ -7,12 +7,13 @@ import { PaymentStatusChart } from "@/components/charts/PaymentStatusChart";
 import { RevenueChart } from "@/components/charts/RevenueChart";
 import { formatCurrency } from "@/lib/utils";
 import { BarChart, Calendar, ArrowDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompanyMetrics {
-  totalInvoiced: number;
-  totalPaid: number;
-  outstandingAmount: number;
-  averageDaysToPay: number;
+  total_invoiced: number;
+  total_paid: number;
+  outstanding_amount: number;
+  average_days_to_pay: number;
 }
 
 export default function DashboardPage() {
@@ -23,18 +24,26 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!selectedCompany) return;
 
-    // Simulate API call delay
-    setLoading(true);
-    setTimeout(() => {
-      const mockMetrics: CompanyMetrics = {
-        totalInvoiced: 125000,
-        totalPaid: 97500,
-        outstandingAmount: 27500,
-        averageDaysToPay: 28.5
-      };
-      setMetrics(mockMetrics);
-      setLoading(false);
-    }, 1000);
+    const fetchMetrics = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('company_metrics')
+          .select('*')
+          .eq('client_name', selectedCompany.name)
+          .single();
+
+        if (error) throw error;
+
+        setMetrics(data);
+      } catch (error) {
+        console.error('Error fetching metrics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
   }, [selectedCompany]);
 
   return (
@@ -49,28 +58,28 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard 
           title="Total Invoiced" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.totalInvoiced || 0)} 
+          value={loading ? "Loading..." : formatCurrency(metrics?.total_invoiced || 0)} 
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 8.2, isPositive: true }}
         />
         <KpiCard 
           title="Total Paid" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.totalPaid || 0)} 
+          value={loading ? "Loading..." : formatCurrency(metrics?.total_paid || 0)} 
           loading={loading}
           icon={<BarChart className="h-4 w-4" />}
           trend={{ value: 12.5, isPositive: true }}
         />
         <KpiCard 
           title="Outstanding Amount" 
-          value={loading ? "Loading..." : formatCurrency(metrics?.outstandingAmount || 0)} 
+          value={loading ? "Loading..." : formatCurrency(metrics?.outstanding_amount || 0)} 
           loading={loading}
           icon={<ArrowDown className="h-4 w-4" />}
           trend={{ value: 3.8, isPositive: false }}
         />
         <KpiCard 
           title="Average Days to Pay" 
-          value={loading ? "Loading..." : `${metrics?.averageDaysToPay} days`} 
+          value={loading ? "Loading..." : `${metrics?.average_days_to_pay || 0} days`} 
           loading={loading}
           icon={<Calendar className="h-4 w-4" />}
           trend={{ value: 1.3, isPositive: true }}
