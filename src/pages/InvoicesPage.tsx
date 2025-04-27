@@ -12,7 +12,7 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 150;
+  const itemsPerPage = 1000;
 
   useEffect(() => {
     if (!selectedCompany) return;
