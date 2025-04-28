@@ -12,6 +12,21 @@ interface StatusBarData {
   paid: number;
 }
 
+interface MonthlyBreakdown {
+  client_name: string | null;
+  id: string;
+  invoiced_amount: number | null;
+  month: string | null;
+  paid_amount: number | null;
+}
+
+interface Invoice {
+  "Invoice Month": string | null;
+  "Invoice Amount": number | null;
+  "Paid Amount": number | null;
+  [key: string]: any;
+}
+
 export function PaymentStatusBarChart() {
   const { selectedCompany } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -30,7 +45,7 @@ export function PaymentStatusBarChart() {
           .from('monthly_breakdown')
           .select('*')
           .eq('client_name', selectedCompany.name)
-          .order('month') as { data: any[], error: any };
+          .order('month') as { data: MonthlyBreakdown[] | null, error: any };
 
         if (monthlyError) {
           console.error('Error fetching from monthly_breakdown:', monthlyError);
@@ -53,9 +68,9 @@ export function PaymentStatusBarChart() {
           
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
-            .select('Invoice Month, Invoice Amount, Paid Amount')
+            .select('"Invoice Month", "Invoice Amount", "Paid Amount"')
             .eq('"Client Name"', selectedCompany.name)
-            .order('"Invoice Month"') as { data: any[], error: any };
+            .order('"Invoice Month"') as { data: Invoice[] | null, error: any };
 
           if (invoiceError) {
             console.error('Error fetching from invoices:', invoiceError);

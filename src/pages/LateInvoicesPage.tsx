@@ -4,6 +4,17 @@ import { useCompany } from "@/context/CompanyContext";
 import { InvoicesTable, Invoice } from "@/components/tables/InvoicesTable";
 import { supabase } from "@/integrations/supabase/client";
 
+interface InvoiceData {
+  id: string;
+  "Invoice Reference": string | null;
+  "Date Invoiced": string | null;
+  "Invoice Amount": number | null;
+  "Paid Amount": number | null;
+  "No. Days taken to Pay": number | null;
+  "Payment Status": string | null;
+  [key: string]: any;
+}
+
 export default function LateInvoicesPage() {
   const { selectedCompany } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -19,7 +30,7 @@ export default function LateInvoicesPage() {
           .from('invoices')
           .select('*')
           .eq('"Client Name"', selectedCompany.name)
-          .eq('"Is Late"', true);
+          .eq('"Is Late"', true) as { data: InvoiceData[] | null, error: any };
           
         if (error) throw error;
         

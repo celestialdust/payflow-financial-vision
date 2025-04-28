@@ -11,6 +11,16 @@ export interface PaymentStatusData {
   value: number;
 }
 
+interface CompanyMetrics {
+  payment_status_breakdown: string | Record<string, number> | null;
+  [key: string]: any;
+}
+
+interface Invoice {
+  "Payment Status": string | null;
+  [key: string]: any;
+}
+
 export function PaymentStatusChart() {
   const { selectedCompany } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -29,7 +39,7 @@ export function PaymentStatusChart() {
           .from('company_metrics')
           .select('payment_status_breakdown')
           .eq('client_name', selectedCompany.name)
-          .maybeSingle() as { data: any, error: any };
+          .maybeSingle() as { data: CompanyMetrics | null, error: any };
         
         if (metricsError) {
           console.error('Error fetching payment status from metrics:', metricsError);
@@ -57,7 +67,7 @@ export function PaymentStatusChart() {
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
             .select('"Payment Status"')
-            .eq('"Client Name"', selectedCompany.name) as { data: any[], error: any };
+            .eq('"Client Name"', selectedCompany.name) as { data: Invoice[] | null, error: any };
             
           if (invoiceError) {
             console.error('Error fetching invoices for payment status:', invoiceError);
@@ -83,24 +93,15 @@ export function PaymentStatusChart() {
             
             console.log("Calculated payment status data:", chartData);
           } else {
-            // Use mock data if no real data available
-            chartData = [
-              { name: 'Fully Paid', value: 17 },
-              { name: 'Partially Paid', value: 2 }
-            ];
-            console.log("No invoice data found, using mock payment status data");
+            console.log("No invoice data found");
+            chartData = [];
           }
         }
         
         setData(chartData);
       } catch (error) {
         console.error('Error fetching payment status data:', error);
-        
-        // Use mock data in case of error
-        setData([
-          { name: 'Fully Paid', value: 17 },
-          { name: 'Partially Paid', value: 2 }
-        ]);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -111,6 +112,14 @@ export function PaymentStatusChart() {
 
   if (loading) {
     return <div className="flex items-center justify-center h-[300px]">Loading chart data...</div>;
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px]">
+        No payment status data available
+      </div>
+    );
   }
 
   // Calculate total for percentage calculation
@@ -136,7 +145,7 @@ export function PaymentStatusChart() {
           </Pie>
           <Tooltip 
             formatter={(value, name, props) => [
-              `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(0)}%)`, 
+              `${value} (${((Number(value) / total) * 100).toFixed(0)}%)`, 
               name
             ]} 
           />
