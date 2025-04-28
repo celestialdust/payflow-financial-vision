@@ -47,16 +47,30 @@ export function PaymentStatusBarChart() {
           margin={{
             top: 20,
             right: 30,
-            left: 20,
+            left: 60,
             bottom: 5,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
-          <YAxis tickFormatter={(value) => `$${value}`} />
-          <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
-          <Bar dataKey="outstanding" stackId="a" fill="#dc3545" name="Outstanding" />
-          <Bar dataKey="paid" stackId="a" fill="#28a745" name="Paid" />
+          <YAxis 
+            tickFormatter={(value) => {
+              if (value >= 1000000) {
+                return `$${(value / 1000000).toFixed(1)}M`;
+              } else if (value >= 1000) {
+                return `$${(value / 1000).toFixed(1)}K`;
+              }
+              return `$${value}`;
+            }}
+          />
+          <Tooltip 
+            formatter={(value, name) => {
+              const label = name === "outstanding" ? "Outstanding Amount" : "Paid Amount";
+              return [formatCurrency(Number(value)), label];
+            }} 
+          />
+          <Bar dataKey="outstanding" stackId="a" fill="#dc3545" name="outstanding" />
+          <Bar dataKey="paid" stackId="a" fill="#28a745" name="paid" />
         </BarChart>
       </ResponsiveContainer>
     </div>
