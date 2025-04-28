@@ -127,7 +127,7 @@ export function PaymentStatusChart() {
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            label={({ name, value }) => `${name}: ${value} (${((value / total) * 100).toFixed(0)}%)`}
+            label={null}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

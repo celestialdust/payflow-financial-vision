@@ -181,13 +181,13 @@ export function RevenueChart() {
 
   return (
     <div className="w-full h-[300px]">
-      <ResponsiveContainer width="100%" height="100%">
+     <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{
             top: 10,
             right: 30,
-            left: 0,
+            left: 50, // Increased left margin
             bottom: 0,
           }}
         >
@@ -201,7 +201,7 @@ export function RevenueChart() {
                 return `$${(value / 1000).toFixed(1)}K`;
               }
               return `$${value}`;
-            }}
+            }} 
           />
           <Tooltip 
             formatter={(value, name) => {
