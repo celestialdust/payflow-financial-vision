@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useCompany } from "@/context/CompanyContext";
@@ -117,37 +116,30 @@ export function PaymentStatusChart() {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="w-full h-[350px] p-4">
+    <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            labelLine={true}
-            outerRadius={120}
+            labelLine={false}
+            outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            label={({ name, value }) => `${name}: ${((value / total) * 100).toFixed(1)}%`}
+            label={({ name, value }) => `${name}: ${value} (${((value / total) * 100).toFixed(0)}%)`}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip 
-            formatter={(value, name) => [
-              `${value} (${((Number(value) / total) * 100).toFixed(1)}%)`, 
+            formatter={(value, name, props) => [
+              `${value} (${((Number(value) / total) * 100).toFixed(0)}%)`, 
               name
             ]} 
           />
-          <Legend
-            layout="horizontal"
-            verticalAlign="bottom"
-            align="center"
-            wrapperStyle={{
-              paddingTop: "20px"
-            }}
-          />
+          <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>

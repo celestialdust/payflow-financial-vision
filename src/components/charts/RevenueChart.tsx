@@ -20,6 +20,12 @@ interface RevenueData {
   paid: number;
 }
 
+// Define interface for the monthly data structure
+interface MonthlyData {
+  monthly_invoiced?: Record<string, number>;
+  monthly_paid?: Record<string, number>;
+}
+
 export function RevenueChart() {
   const { selectedCompany } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -174,25 +180,19 @@ export function RevenueChart() {
   }
 
   return (
-    <div className="w-full h-[350px] p-4">
+    <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{
             top: 10,
             right: 30,
-            left: 60,
-            bottom: 20,
+            left: 0,
+            bottom: 0,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis 
-            dataKey="month" 
-            angle={-45}
-            textAnchor="end"
-            height={60}
-            interval={0}
-          />
+          <XAxis dataKey="month" />
           <YAxis 
             tickFormatter={(value) => {
               if (value >= 1000000) {
@@ -205,7 +205,7 @@ export function RevenueChart() {
           />
           <Tooltip 
             formatter={(value, name) => {
-              const label = name === "invoiced" ? "Invoiced Amount" : "Paid Amount";
+              const label = name === "Invoiced" ? "Invoiced Amount" : "Paid Amount";
               return [formatCurrency(Number(value)), label];
             }} 
           />
@@ -215,7 +215,7 @@ export function RevenueChart() {
             stroke="#007bff" 
             fill="#007bff" 
             fillOpacity={0.3} 
-            name="invoiced"
+            name="Invoiced"
           />
           <Area 
             type="monotone" 
@@ -223,7 +223,7 @@ export function RevenueChart() {
             stroke="#28a745" 
             fill="#28a745" 
             fillOpacity={0.3} 
-            name="paid"
+            name="Paid"
           />
         </AreaChart>
       </ResponsiveContainer>
