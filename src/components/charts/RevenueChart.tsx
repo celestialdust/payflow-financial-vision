@@ -194,9 +194,9 @@ export function RevenueChart() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis tickFormatter={(value) => `$${value}`} />
-          <Tooltip 
+         <Tooltip 
             formatter={(value, name) => {
-              const label = name === "invoiced" ? "Invoiced Amount" : "Paid Amount";
+              const label = name === "Invoiced" ? "Invoiced Amount" : "Paid Amount";
               return [formatCurrency(Number(value)), label];
             }} 
           />
