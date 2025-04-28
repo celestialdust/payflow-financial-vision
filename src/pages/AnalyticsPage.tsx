@@ -1,8 +1,8 @@
 
 import { ChartCard } from "@/components/dashboard/ChartCard";
+import { PaymentTrendChart } from "@/components/charts/PaymentTrendChart";
 import { PaymentStatusBarChart } from "@/components/charts/PaymentStatusBarChart";
 import { LateInvoicesChart } from "@/components/charts/LateInvoicesChart";
-import { PaymentStatusChart } from "@/components/charts/PaymentStatusChart";
 
 export default function AnalyticsPage() {
   return (
@@ -13,12 +13,8 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <ChartCard title="Outstanding vs. Paid Amounts Over Time">
-          <PaymentStatusBarChart />
-        </ChartCard>
-        
-        <ChartCard title="Payment Status Distribution">
-          <PaymentStatusChart />
+        <ChartCard title="Average Days to Pay by Month">
+          <PaymentTrendChart />
         </ChartCard>
         
         <ChartCard title="Percentage of Late Invoices">
