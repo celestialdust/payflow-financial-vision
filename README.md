@@ -1,5 +1,5 @@
 
-# Financial Dashboard & Invoice Data Processing
+# Financial Dashboard & Invoice Data Processing (Available at https://payflow-financial-vision.lovable.app/)
 
 A comprehensive financial dashboard application that visualizes invoice data with analytics and reporting features. This project includes both the data processing pipeline for preparing raw invoice data and the React web application for visualization.
 
@@ -184,8 +184,7 @@ npm run dev
 1. Run the data processing scripts (Python):
    ```
    pip install pandas numpy
-   python process_invoice_data.py
-   python prepare_for_supabase.py
+   python data_cleaning.ipynb
    ```
 
 2. Import the generated CSV files into your Supabase project:
@@ -212,7 +211,7 @@ npm run dev
 │   ├── pages/            # Application pages
 │   └── App.tsx           # Main application component
 ├── supabase/             # Supabase configuration
-└── data-processing/      # Data processing scripts (Python)
+└── data_processing/      # Data processing scripts (Python)
 ```
 
 ## Deployment
