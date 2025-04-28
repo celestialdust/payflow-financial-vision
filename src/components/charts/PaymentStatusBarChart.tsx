@@ -26,11 +26,11 @@ export function PaymentStatusBarChart() {
         console.log(`Fetching payment status data for company: ${selectedCompany.name}`);
         
         // First try monthly_breakdown table
-        let { data: monthlyData, error: monthlyError } = await supabase
+        const { data: monthlyData, error: monthlyError } = await supabase
           .from('monthly_breakdown')
           .select('*')
           .eq('client_name', selectedCompany.name)
-          .order('month');
+          .order('month') as { data: any[], error: any };
 
         if (monthlyError) {
           console.error('Error fetching from monthly_breakdown:', monthlyError);
@@ -55,7 +55,7 @@ export function PaymentStatusBarChart() {
             .from('invoices')
             .select('Invoice Month, Invoice Amount, Paid Amount')
             .eq('"Client Name"', selectedCompany.name)
-            .order('"Invoice Month"');
+            .order('"Invoice Month"') as { data: any[], error: any };
 
           if (invoiceError) {
             console.error('Error fetching from invoices:', invoiceError);

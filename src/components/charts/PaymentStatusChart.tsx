@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useCompany } from "@/context/CompanyContext";
@@ -24,11 +25,11 @@ export function PaymentStatusChart() {
         console.log(`Fetching payment status data for company: ${selectedCompany.name}`);
 
         // Try company_metrics first (payment_status_breakdown field)
-        let { data: metricsData, error: metricsError } = await supabase
+        const { data: metricsData, error: metricsError } = await supabase
           .from('company_metrics')
           .select('payment_status_breakdown')
           .eq('client_name', selectedCompany.name)
-          .maybeSingle();
+          .maybeSingle() as { data: any, error: any };
         
         if (metricsError) {
           console.error('Error fetching payment status from metrics:', metricsError);
@@ -56,7 +57,7 @@ export function PaymentStatusChart() {
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
             .select('"Payment Status"')
-            .eq('"Client Name"', selectedCompany.name);
+            .eq('"Client Name"', selectedCompany.name) as { data: any[], error: any };
             
           if (invoiceError) {
             console.error('Error fetching invoices for payment status:', invoiceError);
@@ -135,7 +136,7 @@ export function PaymentStatusChart() {
           </Pie>
           <Tooltip 
             formatter={(value, name, props) => [
-              `${value} (${((Number(value) / total) * 100).toFixed(0)}%)`, 
+              `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(0)}%)`, 
               name
             ]} 
           />

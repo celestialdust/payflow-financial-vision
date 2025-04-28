@@ -25,7 +25,7 @@ export default function InvoicesPage() {
         const { data, error } = await supabase
           .from('invoices')
           .select('*')
-          .eq('"Client Name"', selectedCompany.name);
+          .eq('"Client Name"', selectedCompany.name) as { data: any[], error: any };
 
         if (error) {
           console.error('Error fetching invoices:', error);
@@ -71,13 +71,13 @@ export default function InvoicesPage() {
         
         // Use mock data in case of error
         const mockInvoices: Invoice[] = Array.from({ length: 10 }, (_, i) => ({
-          id: `mock-${i + 1}`,
-          reference: `INV-${2023}-${i + 1000}`,
-          date: `2023-${String(i % 12 + 1).padStart(2, '0')}-${String(Math.min(28, i + 1)).padStart(2, '0')}`,
-          amount: 1000 + (i * 100),
-          paidAmount: i % 3 === 0 ? 0 : 1000 + (i * 100),
-          daysToPay: i % 3 === 0 ? 0 : 15 + i,
-          status: i % 3 === 0 ? 'Unpaid' : (i % 3 === 1 ? 'Fully Paid' : 'Partially Paid')
+            id: `mock-${i + 1}`,
+            reference: `INV-${2023}-${i + 1000}`,
+            date: `2023-${String(i % 12 + 1).padStart(2, '0')}-${String(Math.min(28, i + 1)).padStart(2, '0')}`,
+            amount: 1000 + (i * 100),
+            paidAmount: i % 3 === 0 ? 0 : 1000 + (i * 100),
+            daysToPay: i % 3 === 0 ? 0 : 15 + i,
+            status: i % 3 === 0 ? 'Unpaid' : (i % 3 === 1 ? 'Fully Paid' : 'Partially Paid')
         }));
         
         setInvoices(mockInvoices);

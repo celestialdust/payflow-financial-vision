@@ -34,7 +34,7 @@ export function LateInvoicesChart() {
           .from('invoices')
           .select('Invoice Month, Is Late')
           .eq('"Client Name"', selectedCompany.name)
-          .order('"Invoice Month"');
+          .order('"Invoice Month"') as { data: any[], error: any };
 
         if (error) {
           console.error('Error fetching late invoices data:', error);

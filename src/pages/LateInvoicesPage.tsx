@@ -19,7 +19,7 @@ export default function LateInvoicesPage() {
           .from('invoices')
           .select('*')
           .eq('"Client Name"', selectedCompany.name)
-          .eq('"Is Late"', true);
+          .eq('"Is Late"', true) as { data: any[], error: any };
           
         if (error) throw error;
         
