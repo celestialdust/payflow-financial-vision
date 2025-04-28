@@ -54,7 +54,12 @@ export function PaymentStatusBarChart() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis tickFormatter={(value) => `$${value}`} />
-          <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+          <Tooltip 
+            formatter={(value, name) => {
+              const label = name === "Outstanding" ? "Outstanding Amount" : "Paid Amount";
+              return [formatCurrency(Number(value)), label];
+            }} 
+          />
           <Bar dataKey="outstanding" stackId="a" fill="#dc3545" name="Outstanding" />
           <Bar dataKey="paid" stackId="a" fill="#28a745" name="Paid" />
         </BarChart>
