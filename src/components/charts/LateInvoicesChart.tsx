@@ -32,9 +32,9 @@ export function LateInvoicesChart() {
         
         const { data: invoiceData, error } = await supabase
           .from('invoices')
-          .select('Invoice Month, Is Late')
+          .select('"Invoice Month", "Is Late"')
           .eq('"Client Name"', selectedCompany.name)
-          .order('"Invoice Month"') as { data: any[], error: any };
+          .order('"Invoice Month"');
 
         if (error) {
           console.error('Error fetching late invoices data:', error);
