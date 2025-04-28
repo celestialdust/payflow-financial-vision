@@ -203,7 +203,12 @@ export function RevenueChart() {
               return `$${value}`;
             }}
           />
-          <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+          <Tooltip 
+            formatter={(value, name) => {
+              const label = name === "Invoiced" ? "Invoiced Amount" : "Paid Amount";
+              return [formatCurrency(Number(value)), label];
+            }} 
+          />
           <Area 
             type="monotone" 
             dataKey="invoiced" 
