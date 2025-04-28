@@ -1,73 +1,239 @@
-# Welcome to your Lovable project
 
-## Project info
+# Financial Dashboard & Invoice Data Processing
 
-**URL**: https://lovable.dev/projects/8105b7dc-be10-4233-99e8-23fb79fd2e9b
+A comprehensive financial dashboard application that visualizes invoice data with analytics and reporting features. This project includes both the data processing pipeline for preparing raw invoice data and the React web application for visualization.
 
-## How can I edit this code?
+## Project Overview
 
-There are several ways of editing your application.
+This system consists of two main components:
 
-**Use Lovable**
+1. **Data Processing Pipeline** - Transforms raw CSV invoice data into clean, structured formats for Supabase
+2. **Web Dashboard Application** - React application that provides visualizations and insights based on the processed data
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8105b7dc-be10-4233-99e8-23fb79fd2e9b) and start prompting.
+## Data Processing Pipeline
 
-Changes made via Lovable will be committed automatically to this repo.
+The data pipeline transforms raw invoice records into:
+- Cleaned invoice data with standardized formats
+- Company-specific metrics for dashboard visualizations
+- CSV outputs with UUID primary keys ready for Supabase import
 
-**Use your preferred IDE**
+### Data Cleaning Process
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+#### Input Data
+The source file `Data for Technical Challenge.csv` contains invoice records with the following fields:
+- Date Invoiced
+- Date Paid
+- No. Days taken to Pay
+- Client Name
+- Invoice Reference
+- Invoice Amount
+- Paid Amount
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### Cleaning Steps
 
-Follow these steps:
+1. **Data Loading & Exploration**
+   - Load CSV data using pandas
+   - Analyze data structure, types, and missing values
+   - Identify data quality issues
+
+2. **Data Cleaning**
+   - Convert date fields to proper datetime format
+   - Standardize Invoice Reference format to YEAR-REFERENCE NUMBER
+   - Handle missing values with appropriate defaults
+   - Validate and recalculate "Days to Pay" where needed
+   - Add payment status classification (Fully Paid, Partially Paid, Unpaid, Overpaid)
+   - Define late payments (>30 days threshold)
+
+3. **Derived Metrics**
+   - Add month/year columns for time-based analysis
+   - Add Outstanding Invoice flags
+   - Calculate Amount Due (Invoice Amount - Paid Amount)
+
+4. **Company-Specific Metrics**
+   - Total invoices and amounts per company
+   - Average days to pay
+   - Late invoice statistics
+   - Monthly totals for visualization
+   - Payment status breakdowns
+
+5. **Export Preparation**
+   - Format data for Supabase compatibility
+   - Convert NumPy types to Python native types for JSON serialization
+   - Generate CSV files with UUID primary keys for direct Supabase import
+
+### Output Files
+
+1. **supabase_invoices.csv**
+   - Complete cleaned dataset with all invoice records and UUID primary keys
+
+2. **supabase_company_metrics.csv**
+   - Pre-calculated metrics for each company with UUID primary keys
+
+3. **supabase_monthly_breakdown.csv**
+   - Monthly aggregations for time-series analysis with UUID primary keys
+
+### Data Schema
+
+#### Cleaned Invoice Data Fields
+- id: UUID (Primary Key)
+- Date Invoiced: Date (YYYY-MM-DD)
+- Date Paid: Date (YYYY-MM-DD)
+- No. Days taken to Pay: Integer
+- Client Name: String
+- Invoice Reference: String (YYYY-NNNN format)
+- Invoice Amount: Float
+- Paid Amount: Float
+- Payment Status: String (Fully Paid, Partially Paid, Unpaid, Overpaid)
+- Is Late: Boolean (true if payment took >30 days)
+- Is Outstanding: Boolean
+- Amount Due: Float
+- Invoice Month/Year: String/Integer
+- Payment Month/Year: String/Integer
+
+#### Company Metrics Fields
+- id: UUID (Primary Key)
+- client_name: String
+- total_invoices: Integer
+- total_invoiced: Float
+- total_paid: Float
+- average_days_to_pay: Float
+- late_invoices_count: Integer
+- late_invoices_percentage: Float
+- outstanding_invoices: Integer
+- outstanding_amount: Float
+- monthly_data: JSON Object containing:
+  - monthly_invoiced: Object (Month -> Amount)
+  - monthly_paid: Object (Month -> Amount)
+- payment_status_breakdown: Object (Status -> Count)
+
+#### Monthly Breakdown Fields
+- id: UUID (Primary Key)
+- client_name: String
+- month: String (YYYY-MM)
+- invoiced_amount: Float
+- paid_amount: Float
+
+## Web Dashboard Application
+
+The web application provides a user-friendly interface to visualize and analyze the processed invoice data through interactive charts, tables, and reports.
+
+### Features
+
+- **Dashboard Overview**: Summary of key metrics and KPIs
+- **Company Selection**: Filter data by company/client
+- **Interactive Charts**:
+  - Revenue trends (invoiced vs. paid amounts)
+  - Payment status distribution
+  - Late invoice percentages
+  - Monthly payment status breakdown
+- **Detailed Tables**:
+  - Invoice listing with filtering and sorting
+  - Monthly breakdown analysis
+  - Late invoice analysis
+- **Analytics**: Deep dive into payment trends and patterns
+
+### Technologies Used
+
+- **Frontend**:
+  - React with TypeScript
+  - Vite for fast development
+  - Tailwind CSS for styling
+  - shadcn/ui component library
+  - recharts for data visualization
+  - React Router for navigation
+  - React Query for data fetching and state management
+
+- **Backend**:
+  - Supabase for database and authentication
+  - PostgreSQL for data storage
+  - Row-Level Security for data protection
+
+### Database Structure
+
+The application connects to a Supabase database with the following tables:
+
+1. **invoices** - Stores individual invoice records
+2. **company_metrics** - Contains pre-calculated metrics per company
+3. **monthly_breakdown** - Provides monthly aggregated data
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Access to a Supabase project with the proper tables configured
+
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Data Import Process
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Run the data processing scripts (Python):
+   ```
+   pip install pandas numpy
+   python process_invoice_data.py
+   python prepare_for_supabase.py
+   ```
 
-**Use GitHub Codespaces**
+2. Import the generated CSV files into your Supabase project:
+   - Navigate to the Supabase Table Editor
+   - Create tables with matching schemas
+   - Import the corresponding CSV files
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+├── public/               # Static assets
+├── src/
+│   ├── components/       # Reusable UI components
+│   │   ├── charts/       # Data visualization components
+│   │   ├── dashboard/    # Dashboard-specific components
+│   │   ├── layout/       # Layout components
+│   │   ├── tables/       # Table components 
+│   │   └── ui/           # UI components from shadcn
+│   ├── context/          # React context providers
+│   ├── hooks/            # Custom React hooks
+│   ├── integrations/     # Integration with external services
+│   │   └── supabase/     # Supabase client and types
+│   ├── lib/              # Utility functions and helpers
+│   ├── pages/            # Application pages
+│   └── App.tsx           # Main application component
+├── supabase/             # Supabase configuration
+└── data-processing/      # Data processing scripts (Python)
+```
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The application can be deployed via the Lovable platform or transferred to a custom hosting solution:
 
-## How can I deploy this project?
+1. Via Lovable:
+   - Navigate to Project > Settings > Publish
+   - Click "Publish" to deploy the application
 
-Simply open [Lovable](https://lovable.dev/projects/8105b7dc-be10-4233-99e8-23fb79fd2e9b) and click on Share -> Publish.
+2. With custom domain:
+   - Navigate to Project > Settings > Domains
+   - Connect your custom domain
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes, you can!
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Acknowledgements
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- [Supabase](https://supabase.com/) for the backend infrastructure
+- [shadcn/ui](https://ui.shadcn.com/) for the UI components
+- [recharts](https://recharts.org/) for the chart visualizations
+- [Lovable](https://lovable.dev/) for the development platform
